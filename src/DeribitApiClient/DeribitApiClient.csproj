@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DeribitApiClient.Application\DeribitApiClient.Application.csproj" />
+    <ProjectReference Include="..\DeribitApiClient.Infrastructure\DeribitApiClient.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
