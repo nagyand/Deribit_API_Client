@@ -39,7 +39,7 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         }
         var buffer = ArrayPool<byte>.Shared.Rent(1024);
         string message = JsonConvert.SerializeObject(authenticationMessage);
-        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message),WebSocketMessageType.Text,true ,token);
+        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, token);
         var response = await _webSocketClient.ReceiveAsync(buffer, token);
 
         if (response.MessageType != WebSocketMessageType.Close)
