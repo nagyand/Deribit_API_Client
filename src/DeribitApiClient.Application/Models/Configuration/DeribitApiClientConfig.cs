@@ -1,6 +1,6 @@
 ﻿namespace DeribitApiClient.Application.Models.Configuration;
 
-public class DeribitAPIConfiguration
+public class DeribitApiClientConfig
 {
     public string BaseUrl { get; set; }
     public string ClientId { get; set; }
