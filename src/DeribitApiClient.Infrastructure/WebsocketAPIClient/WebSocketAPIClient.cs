@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DeribitApiClient.Infrastructure.WebsocketAPIClient;
 
+/// <summary>
+/// Wrapper class around ClientWebSocket
+/// </summary>
 internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
 {
     private bool disposedValue;
@@ -22,13 +25,13 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         _webSocketClient = new ClientWebSocket();
     }
 
-    public async ValueTask Connect(string url, CancellationToken ctc)
+    public async ValueTask Connect(string url, CancellationToken token)
     {
-        await _webSocketClient.ConnectAsync(new Uri(url), ctc);
+        await _webSocketClient.ConnectAsync(new Uri(url), token);
         _isConnected = false;
     }
 
-    public async ValueTask<WebSocketRequestResponse> Authenticate(AuthenticationRequest authenticationMessage, CancellationToken ctc)
+    public async ValueTask<WebSocketRequestResponse> Authenticate(AuthenticationRequest authenticationMessage, CancellationToken token)
     {
         if (_isConnected == false)
         {
@@ -36,8 +39,8 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         }
         var buffer = ArrayPool<byte>.Shared.Rent(1024);
         string message = JsonConvert.SerializeObject(authenticationMessage);
-        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message),WebSocketMessageType.Text,true ,ctc);
-        var response = await _webSocketClient.ReceiveAsync(buffer, ctc);
+        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message),WebSocketMessageType.Text,true ,token);
+        var response = await _webSocketClient.ReceiveAsync(buffer, token);
 
         if (response.MessageType != WebSocketMessageType.Close)
         {
@@ -49,7 +52,7 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         return new WebSocketRequestResponse(true, "Authentication is succesfull");
     }
 
-    public async ValueTask<WebSocketRequestResponse> SubscripbeToChannels(ChannelsSubscriptionRequest subscriptionMessage, CancellationToken ctc)
+    public async ValueTask<WebSocketRequestResponse> SubscripbeToChannels(ChannelsSubscriptionRequest subscriptionMessage, CancellationToken token)
     {
         if (_isAuthenticated == false)
         {
@@ -57,8 +60,8 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         }
         var buffer = ArrayPool<byte>.Shared.Rent(1024);
         string message = JsonConvert.SerializeObject(subscriptionMessage);
-        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, ctc);
-        var response = await _webSocketClient.ReceiveAsync(buffer, ctc);
+        await _webSocketClient.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, token);
+        var response = await _webSocketClient.ReceiveAsync(buffer, token);
         if (response.MessageType != WebSocketMessageType.Close)
         {
             ArrayPool<byte>.Shared.Return(buffer);
@@ -68,10 +71,10 @@ internal class WebSocketAPIClient : IWebSocketAPIClient, IDisposable
         return new WebSocketRequestResponse(false, "Subscription is failed because of Web socket is closed");
     }
 
-    public async ValueTask<string> ReadAsync(CancellationToken ctc)
+    public async ValueTask<string> ReadAsync(CancellationToken token)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(1024);
-        var response = await _webSocketClient.ReceiveAsync(buffer, ctc);
+        var response = await _webSocketClient.ReceiveAsync(buffer, token);
         var resultString = Encoding.ASCII.GetString(buffer, 0, response.Count);
         ArrayPool<byte>.Shared.Return(buffer);
         return resultString;
