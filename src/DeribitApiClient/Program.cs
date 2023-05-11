@@ -1,7 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using DeribitApiClient.Application.Handlers;
 using DeribitApiClient.Application.Interfaces;
 using DeribitApiClient.Application.Models.Configuration;
 using DeribitApiClient.Infrastructure.LogProvider;
+using DeribitApiClient.Infrastructure.WebsocketAPIClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,8 +12,10 @@ using IHost host = Host.CreateDefaultBuilder(args).ConfigureAppConfiguration
     ((hostingContext, configuration) =>
     {
         IHostEnvironment env = hostingContext.HostingEnvironment;
-        configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+        
+        // not needed, these are already added by default
+        //configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        //             .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
 
         IConfigurationRoot configurationRoot = configuration.Build();
 
@@ -19,8 +23,8 @@ using IHost host = Host.CreateDefaultBuilder(args).ConfigureAppConfiguration
     {
         var valami = hostContext.Configuration;
         services.Configure<DeribitApiClientConfig>(hostContext.Configuration.GetSection(nameof(DeribitApiClientConfig)));
-        services.AddSingleton<IWebSocketAPIClient, IWebSocketAPIClient>();
-        services.AddSingleton<IDeribitAPIHandler, IDeribitAPIHandler>();
+        services.AddSingleton<IWebSocketAPIClient, WebSocketAPIClient>();
+        services.AddSingleton<IDeribitAPIHandler, DeribitAPIHandler>();
         services.AddSingleton<ILogProvider, LogProvider>();
     }).Build();
 

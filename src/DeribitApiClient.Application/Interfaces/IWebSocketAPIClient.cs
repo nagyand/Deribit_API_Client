@@ -12,5 +12,5 @@ public interface IWebSocketAPIClient
     ValueTask Connect(string url, CancellationToken token);
     void Dispose();
     ValueTask<string> ReadAsync(CancellationToken token);
-    ValueTask<WebSocketRequestResponse> SubscripbeToChannels(ChannelsSubscriptionRequest subscriptionMessage, CancellationToken token);
+    ValueTask<WebSocketRequestResponse> SubscribeToChannels(ChannelsSubscriptionRequest subscriptionMessage, CancellationToken token);
 }

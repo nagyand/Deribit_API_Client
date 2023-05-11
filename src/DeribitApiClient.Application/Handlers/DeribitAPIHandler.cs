@@ -12,7 +12,7 @@ public class DeribitAPIHandler:IDeribitAPIHandler
     private readonly IWebSocketAPIClient _client;
     private readonly ILogProvider _logger;
 
-    public DeribitAPIHandler(IWebSocketAPIClient client, ILogProvider logProvider ,IOptions<DeribitApiClientConfig> config)
+    public DeribitAPIHandler(IWebSocketAPIClient client, ILogProvider logProvider, IOptions<DeribitApiClientConfig> config)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _logger = logProvider ?? throw new ArgumentNullException(nameof(logProvider));
@@ -22,19 +22,36 @@ public class DeribitAPIHandler:IDeribitAPIHandler
 
     public async ValueTask RunAsync(CancellationToken token)
     {
+        // establish connection
         await _client.Connect(_deribitApiClientConfig.BaseUrl, token);
-        var authenticationResult = await _client.Authenticate(new AuthenticationRequest(), token);
+
+        // authenticate
+        var authRequest = new AuthenticationRequest()
+        {
+            GrantType = "client_credentials",
+            ClientId = _deribitApiClientConfig.ClientId,
+            ClientSecret = _deribitApiClientConfig.ClientSecret
+        };
+        var authenticationResult = await _client.Authenticate(authRequest, token);
         if (!authenticationResult.IsSuccessfull)
         {
             _logger.LogError("Authentication is failed");
             return;
         }
-        var subscriptionResult = await _client.SubscripbeToChannels(new ChannelsSubscriptionRequest(), token);
+
+        // subscribe to data feed
+        var subscribeRequest = new ChannelsSubscriptionRequest()
+        {
+            Channels = _deribitApiClientConfig.SubscribeTo
+        };
+        var subscriptionResult = await _client.SubscribeToChannels(subscribeRequest, token);
         if (!subscriptionResult.IsSuccessfull)
         {
             _logger.LogError("Subscription is failed");
             return;
         }
+
+        // handle incoming messages
         while(_client.State != WebSocketState.Closed && !token.IsCancellationRequested)
         {
             string response = await _client.ReadAsync(token);
