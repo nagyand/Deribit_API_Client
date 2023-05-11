@@ -2,7 +2,9 @@
 
 Hiányzó részek:
 
-DeribitAPIHandler osztálynak implementálni kéne a IDisposeble interfészt vagy tartalmaznia kéne egy Close metódust, hogy le tudjuk zárni a WebSokcetet rendesen
+DeribitAPIHandler osztálynak implementálni kéne a IDisposeble interfészt vagy tartalmaznia kéne egy Close metódust, hogy le tudjuk zárni a WebSokcetet rendesen. 
+
+WebsocketAPIClient-nél A hibakezelés és a retry is kimaradt az implementálásból
 
 A leiratkozás kezelése is kimaradt
 
@@ -12,3 +14,6 @@ A Request modellek
 A konfiguráció validálása
 
 Unit tesztek
+
+# Alternatív út
+A jelenlegi WebsocketAPIClient helyett a SignalR használata
